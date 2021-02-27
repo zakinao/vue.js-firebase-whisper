@@ -6,7 +6,19 @@
       </div>
       <p class="user-name">{{user.name}}</p>
       </div>
-    <div class="content" v-html="whisper.content">
+      <div v-if="editing" class="editor">
+        <textarea v-model="whisper.content" placeholder="edit whisper" @keypress.enter="updateWhisper"></textarea>
+        <p class="message">Press Enter to Whisper</p>
+      </div>
+      <div v-else class="content" v-html="whisper.content"></div>
+      <button v-if="currentUser && currentUser.uid == user.id" @click="showBtns = !showBtns">
+        <fa icon="ellipsis-v" />
+      </button>
+      <div v-if="showBtns" class="controls">
+        <li @click="editing = !editing">edit</li>
+        <li @click="deleteWhisper" style="color: red">
+          delete
+        </li>
     </div>
   </li>
 </template>
@@ -14,13 +26,39 @@
 <script>
 // @ is an alias to /src
 import  { db } from '../main'
+import { auth } from '../main'
 
 export default {
   props: ['id', 'uid'],
   data () {
     return {
       whisper: {},
-      user: {}
+      user: {},
+      currentUser: {},
+      showBtns: false,
+      editing: false
+    }
+  },
+  created () {
+    auth.onAuthStateChanged(user => {
+      this.currentUser = user
+    })
+  },
+  methods: {
+    deleteWhisper () {
+      if (window.confirm('Are You Sure to Delete This Whisper?')) {
+        db.collection('whispers').doc(this.$props.id).delete()
+      }
+    },
+    updateWhisper () {
+      const date = new Date()
+      db.collection('whispers').doc(this.whisper.id).set({
+        'content': this.whisper.content,
+        'date': date
+      }, { merge: true })
+      .then(
+        this.editing = false
+      )
     }
   },
   firestore () {
@@ -85,4 +123,36 @@ export default {
         width 50%
     .content
       padding 10px
+    button
+      position absolute
+      top 5px
+      right 0
+      background transparent
+      color #555
+      font-size .9rem
+      opacity 0
+      transition .2s
+    .controls
+      background white
+      position absolute
+      top 5px
+      right 35px
+      box-shadow 0 0 5px rgba(0,0,0,.05)
+      border-radius 3px
+      opacity 0
+      li
+        padding 5px 20px
+        border-top 1px solid #eee
+        cursor pointer
+        &:first-child
+          border none
+  &:first-child
+    border none
+  &:hover
+    background rgba(0,0,0,.02)
+    .content
+    button
+      opacity 1
+    .controls
+      opacity 1
 </style>

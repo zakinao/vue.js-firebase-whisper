@@ -9,6 +9,7 @@
       </div>
     </div>
     <div class="list">
+
       <Editor :currentUser="currentUser"/>
       <Item
         v-for="whisper in orderBy(myWhispers,'date',-1)"
@@ -54,3 +55,24 @@ export default {
   mixins: [Vue2Filters.mixin]
 }
 </script>
+
+<style lang="stylus" scoped>
+.user-title
+  display flex
+  flex-wrap nowrap
+  justify-content flex-start
+  margin 10px 0
+.avatar
+  width 50px
+  height 50px
+  border-radius 5px
+  background-size cover
+.texts
+  margin-left 10px
+  h1
+    font-size 1.5rem
+    margin 0
+p
+  font-size .8rem
+  margin 0
+</style>
